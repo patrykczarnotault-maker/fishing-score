@@ -141,7 +141,7 @@ body{background-color:#050c08}
 
 
 /* ===== 🎣 CARP EASTER EGG ===== */
-#fsCarpEasterEgg{position:fixed;left:10px;bottom:13vh;width:clamp(135px,16vw,225px);z-index:9999;pointer-events:none;opacity:0;filter:drop-shadow(0 14px 24px rgba(0,0,0,.38));}
+#fsCarpEasterEgg{position:fixed;left:10px;bottom:13vh;width:clamp(135px,16vw,225px);z-index:2147483647;pointer-events:none;opacity:0;filter:drop-shadow(0 14px 24px rgba(0,0,0,.38));}
 #fsCarpEasterEgg.fsCarpShow{animation:fsCarpSwim 9s cubic-bezier(.22,.8,.25,1) forwards}
 #fsCarpEasterEgg .fsCarpBubble{opacity:0;transform:translateY(8px) scale(.92);transform-origin:bottom left}
 #fsCarpEasterEgg.fsCarpShow .fsCarpBubble{animation:fsBubblePop .55s 2.2s ease-out forwards}
@@ -165,9 +165,6 @@ body{background-color:#050c08}
 @keyframes fsFin{0%,100%{transform:rotate(0)}50%{transform:rotate(7deg)}}
 @media(max-width:760px){
   #fsCarpEasterEgg{left:6px;width:clamp(115px,34vw,155px);bottom:15vh}
-}
-@media(prefers-reduced-motion:reduce){
-  #fsCarpEasterEgg{display:none!important}
 }
 </style><link rel="manifest" href="/manifest.json"><link rel="icon" href="/icon.svg" type="image/svg+xml"><meta name="theme-color" content="#0b2117"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Fishing Score"></head><body>
 <div id="fsCarpEasterEgg" aria-hidden="true">
@@ -255,8 +252,8 @@ if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.ser
     void carp.offsetWidth;
     carp.classList.add('fsCarpShow');
     clearTimeout(timer);
-    timer=setTimeout(showCarp, 45000 + Math.random()*45000);
+    timer=setTimeout(showCarp, 35000 + Math.random()*30000);
   }
-  setTimeout(showCarp, 12000);
+  setTimeout(showCarp, 3000);
 })();
 </script></body></html>
