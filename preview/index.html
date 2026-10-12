@@ -103,8 +103,13 @@
 <div class="brand" style="padding:0 0 20px"><span class="brandIcon">🎣</span><span>FISHING SCORE<small>KONTO WĘDKARZA</small></span></div>
 <h2 id="authTitle">Witaj ponownie</h2><p class="muted small" id="authSubtitle">Zaloguj się, aby korzystać ze swojego konta.</p>
 <div class="authModes"><button class="authMode active" data-authmode="login" type="button">Logowanie</button><button class="authMode" data-authmode="register" type="button">Rejestracja</button><button class="authMode" data-authmode="forgot" type="button">Reset hasła</button></div>
-<form id="authForm"><div class="fieldGrid"><div class="field span2" id="authNameWrap" hidden><label for="authName">Nazwa użytkownika</label><input id="authName" autocomplete="nickname" placeholder="Jak mamy Cię nazywać?"></div><div class="field span2"><label for="authEmail">Adres e-mail</label><input id="authEmail" type="email" required autocomplete="email" placeholder="ty@przyklad.pl"></div><div class="field span2" id="authPasswordWrap"><label for="authPassword">Hasło</label><input id="authPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Minimum 6 znaków"></div></div><button class="btn" id="authSubmit" type="submit" style="width:100%;margin-top:14px">Zaloguj się</button><div class="status" id="authStatus" role="status"></div></form>
-<p class="authFoot">Logowanie wymaga poprawnej konfiguracji Supabase Auth.</p></section></div>
+<form id="authForm"><div class="fieldGrid">
+<div class="field span2" id="authNameWrap"><label for="authName">Login</label><input id="authName" autocomplete="username" required minlength="3" maxlength="32" placeholder="Wybierz login"></div>
+<div class="field span2" id="authEmailWrap" hidden><label for="authEmail">Adres e-mail</label><input id="authEmail" type="email" autocomplete="email" placeholder="ty@przyklad.pl"></div>
+<div class="field span2" id="authPasswordWrap"><label for="authPassword">Hasło</label><input id="authPassword" type="password" autocomplete="current-password" minlength="8" placeholder="Minimum 8 znaków"></div>
+<div class="field span2" id="authPasswordHint" hidden><small class="muted">Hasło musi zawierać co najmniej jedną wielką literę i jeden znak specjalny (np. ! @ # $ %).</small></div>
+</div><button class="btn" id="authSubmit" type="submit" style="width:100%;margin-top:14px">Zaloguj się</button><div class="status" id="authStatus" role="status"></div></form>
+<p class="authFoot">Logowanie po loginie wymaga bezpiecznego mapowania loginu na konto w Supabase.</p></section></div>
 <style>
 .authOverlay{display:none;position:fixed;z-index:1000;inset:0;background:#020704d9;backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px}.authOverlay.open{display:flex}.authDialog{position:relative;width:min(100%,440px);padding:26px;border:1px solid #35483a;border-radius:16px;background:#0e1711;box-shadow:0 25px 100px #000a}.authDialog h2{font-size:25px;letter-spacing:-.04em;margin:0 0 5px}.authDialog>p{margin:0 0 17px}.authClose{position:absolute;right:15px;top:12px;background:transparent;color:#cbd7cd;border:0;font-size:27px}.authModes{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;background:#080f0a;border:1px solid var(--line);border-radius:10px;margin-bottom:18px}.authMode{border:0;border-radius:7px;background:transparent;color:var(--muted);font-size:10px;font-weight:800;padding:10px 4px}.authMode.active{background:#9cf36b19;color:var(--green)}.authFoot{font-size:10px;color:#829287;margin-top:15px;line-height:1.6}.authDialog .fieldGrid{grid-template-columns:1fr}
 @media(max-width:720px){.authDialog{padding:22px 18px}.authModes .authMode{font-size:9px}}
@@ -140,12 +145,66 @@ $('catchDate').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).t
 $('catchForm').addEventListener('submit',e=>{e.preventDefault();const l={spot:$('catchSpot').value.trim(),date:$('catchDate').value,author:$('catchAuthor').value,species:$('catchSpecies').value,weight:$('catchWeight').value,length:$('catchLength').value,bait:$('catchBait').value.trim(),groundbait:$('catchGroundbait').value.trim(),note:$('catchNote').value.trim()};const all=getLocalLogs();all.push(l);localStorage.setItem('fs_preview_logs_v2',JSON.stringify(all));$('catchStatus').textContent='Wpis zapisany lokalnie w tej przeglądarce. Nie został wysłany do wspólnej bazy.';e.target.reset();$('catchDate').value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);renderLogs()});
 
 let authMode='login';
-function setAuthMode(mode){authMode=mode;document.querySelectorAll('[data-authmode]').forEach(b=>b.classList.toggle('active',b.dataset.authmode===mode));$('authNameWrap').hidden=mode!=='register';$('authPasswordWrap').hidden=mode==='forgot';$('authPassword').required=mode!=='forgot';$('authPassword').autocomplete=mode==='register'?'new-password':'current-password';$('authTitle').textContent=mode==='login'?'Witaj ponownie':mode==='register'?'Utwórz konto':'Odzyskaj dostęp';$('authSubtitle').textContent=mode==='login'?'Zaloguj się, aby korzystać ze swojego konta.':mode==='register'?'Załóż konto Fishing Score.':'Podaj e-mail, a wyślemy link do zmiany hasła.';$('authSubmit').textContent=mode==='login'?'Zaloguj się':mode==='register'?'Załóż konto':'Wyślij link resetujący';$('authStatus').textContent=''}
+function setAuthMode(mode){
+ authMode=mode;
+ document.querySelectorAll('[data-authmode]').forEach(b=>b.classList.toggle('active',b.dataset.authmode===mode));
+ $('authNameWrap').hidden=false;
+ $('authEmailWrap').hidden=mode!=='register'&&mode!=='forgot';
+ $('authPasswordWrap').hidden=mode==='forgot';
+ $('authPasswordHint').hidden=mode!=='register';
+ $('authName').required=true;
+ $('authEmail').required=mode==='register'||mode==='forgot';
+ $('authPassword').required=mode!=='forgot';
+ $('authPassword').autocomplete=mode==='register'?'new-password':'current-password';
+ $('authTitle').textContent=mode==='login'?'Witaj ponownie':mode==='register'?'Utwórz konto':'Odzyskaj dostęp';
+ $('authSubtitle').textContent=mode==='login'?'Zaloguj się przy użyciu loginu i hasła.':mode==='register'?'Wybierz login, podaj e-mail i ustaw bezpieczne hasło.':'Podaj login oraz e-mail przypisany do konta.';
+ $('authSubmit').textContent=mode==='login'?'Zaloguj się':mode==='register'?'Załóż konto':'Wyślij link resetujący';
+ $('authStatus').textContent='';
+}
 function openAuth(mode='login'){$('authModal').classList.add('open');$('authModal').setAttribute('aria-hidden','false');setAuthMode(mode)}
 function closeAuth(){$('authModal').classList.remove('open');$('authModal').setAttribute('aria-hidden','true')}
-$('authOpen').addEventListener('click',()=>openAuth());$('authClose').addEventListener('click',closeAuth);$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuth()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAuth()});document.querySelectorAll('[data-authmode]').forEach(b=>b.addEventListener('click',()=>setAuthMode(b.dataset.authmode)));
-$('authForm').addEventListener('submit',async e=>{e.preventDefault();const email=$('authEmail').value.trim(),password=$('authPassword').value,status=$('authStatus');status.textContent='Przetwarzam…';$('authSubmit').disabled=true;try{if(!db||!db.auth)throw Error('Supabase Auth jest niedostępne.');let result;if(authMode==='login'){result=await db.auth.signInWithPassword({email,password});if(!result.error){status.textContent='Zalogowano pomyślnie.';$('userAvatar').textContent=(email[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto';setTimeout(closeAuth,800)}}else if(authMode==='register'){result=await db.auth.signUp({email,password,options:{data:{display_name:$('authName').value.trim()}}});if(!result.error)status.textContent='Konto utworzone. Sprawdź e-mail, jeśli wymagana jest weryfikacja.'}else{result=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});if(!result.error)status.textContent='Jeśli konto istnieje, wysłaliśmy link resetujący.'}if(result?.error)throw result.error}catch(err){status.textContent='Operacja nie powiodła się: '+(err.message||'błąd usługi')}finally{$('authSubmit').disabled=false}});
-if(db?.auth){db.auth.getSession().then(({data})=>{if(data.session?.user){$('userAvatar').textContent=(data.session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}});db.auth.onAuthStateChange((event,session)=>{if(session?.user){$('userAvatar').textContent=(session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}else{$('userAvatar').textContent='FS';$('authOpen').textContent='Zaloguj się / Załóż konto'}})}
+$('authOpen').addEventListener('click',()=>openAuth());
+$('authClose').addEventListener('click',closeAuth);
+$('authModal').addEventListener('click',e=>{if(e.target===$('authModal'))closeAuth()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAuth()});
+document.querySelectorAll('[data-authmode]').forEach(b=>b.addEventListener('click',()=>setAuthMode(b.dataset.authmode)));
+const strongPassword=p=>p.length>=8&&/[A-Z]/.test(p)&&/[^A-Za-z0-9]/.test(p);
+$('authForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const login=$('authName').value.trim(),email=$('authEmail').value.trim(),password=$('authPassword').value,status=$('authStatus');
+ status.textContent='Przetwarzam…';$('authSubmit').disabled=true;
+ try{
+  if(!db||!db.auth)throw Error('Supabase Auth nie jest dostępne. Sprawdź konfigurację projektu.');
+  let result;
+  if(authMode==='register'){
+   if(!strongPassword(password))throw Error('Hasło musi mieć minimum 8 znaków, jedną wielką literę i jeden znak specjalny.');
+   if(!/^[a-zA-Z0-9_.-]{3,32}$/.test(login))throw Error('Login musi mieć 3–32 znaki: litery, cyfry, kropkę, myślnik lub podkreślenie.');
+   result=await db.auth.signUp({email,password,options:{data:{username:login,display_name:login}}});
+   if(!result.error)status.textContent='Konto utworzone. Jeśli włączono weryfikację, sprawdź e-mail. Uwaga: unikalność loginu wymaga wymuszenia jej po stronie bazy.';
+  }else if(authMode==='login'){
+   // Supabase password auth accepts email, not username. Resolve username through a secure server-side RPC.
+   const mapped=await db.rpc('get_email_for_username',{username_input:login.toLowerCase()});
+   if(mapped.error)throw Error('Logowanie po loginie wymaga skonfigurowania funkcji get_email_for_username w Supabase.');
+   const resolvedEmail=typeof mapped.data==='string'?mapped.data:mapped.data?.email;
+   if(!resolvedEmail)throw Error('Nie znaleziono konta dla podanego loginu.');
+   result=await db.auth.signInWithPassword({email:resolvedEmail,password});
+   if(!result.error){status.textContent='Zalogowano pomyślnie.';$('userAvatar').textContent=(login[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto';setTimeout(closeAuth,800)}
+  }else{
+   // Check username + email together on the server, without exposing the account email lookup.
+   const verified=await db.rpc('verify_username_email',{username_input:login.toLowerCase(),email_input:email.toLowerCase()});
+   if(verified.error)throw Error('Reset hasła wymaga skonfigurowania funkcji verify_username_email w Supabase.');
+   if(verified.data!==true)throw Error('Login i adres e-mail nie pasują do tego samego konta.');
+   result=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+   if(!result.error)status.textContent='Jeśli dane są poprawne, wysłaliśmy link do resetu hasła na podany adres e-mail.';
+  }
+  if(result?.error)throw result.error;
+ }catch(err){status.textContent='Nie udało się wykonać operacji: '+(err.message||'błąd usługi')}
+ finally{$('authSubmit').disabled=false}
+});
+if(db?.auth){
+ db.auth.getSession().then(({data})=>{if(data.session?.user){$('userAvatar').textContent=(data.session.user.user_metadata?.username?.[0]||data.session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}});
+ db.auth.onAuthStateChange((event,session)=>{if(session?.user){$('userAvatar').textContent=(session.user.user_metadata?.username?.[0]||session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}else{$('userAvatar').textContent='FS';$('authOpen').textContent='Zaloguj się / Załóż konto'}});
+}
 
 loadWeather('Rudna Mała');loadReports();loadSpots();renderLogs();
 </script></body></html>
