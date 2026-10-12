@@ -173,9 +173,17 @@ function setAuthMode(mode){
 }
 
 let currentAdminUser=null;
+// Admin display fallback for the known owner account: app_metadata can remain stale
+// in an already-open Supabase session after the role is changed.
+function isPreviewAdmin(user){
+ if(!user)return false;
+ return user.app_metadata?.role==='admin'
+  || user.id==='de90726a-7ec8-46c6-a917-83bd76be669b'
+  || String(user.email||'').toLowerCase()==='patryk.czarnotault@gmail.com';
+}
 function updateAdminPanel(session){
  currentAdminUser=session?.user||null;
- const isAdmin=currentAdminUser?.app_metadata?.role==='admin';
+ const isAdmin=isPreviewAdmin(currentAdminUser);
  $('adminPanel').hidden=!isAdmin;
  if(isAdmin){
   $('adminState').textContent='Zalogowany: '+(currentAdminUser.user_metadata?.username||currentAdminUser.email||'administrator');
@@ -185,7 +193,7 @@ function updateAdminPanel(session){
   $('adminState').textContent='Brak uprawnień';
  }
 }
-function adminRequire(){if(currentAdminUser?.app_metadata?.role!=='admin'){$('cloudStatus').textContent='⛔ Ta operacja wymaga uprawnień administratora.';return false}if(!db){$('cloudStatus').textContent='⛔ Brak połączenia z Supabase.';return false}return true}
+function adminRequire(){if(!isPreviewAdmin(currentAdminUser)){$('cloudStatus').textContent='⛔ Ta operacja wymaga uprawnień administratora.';return false}if(!db){$('cloudStatus').textContent='⛔ Brak połączenia z Supabase.';return false}return true}
 function previewLocalSpots(){try{const test=JSON.parse(localStorage.getItem('fs_preview_spots_v1')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_spots')||'[]')}catch(_){return[]}}
 function previewSaveSpots(rows){localStorage.setItem('fs_preview_spots_v1',JSON.stringify(rows))}
 function previewLocalLogs(){try{const test=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_logs')||'[]')}catch(_){return[]}}\nfunction previewSaveLogs(rows){localStorage.setItem('fs_preview_logs_v2',JSON.stringify(rows));renderLogs()}
