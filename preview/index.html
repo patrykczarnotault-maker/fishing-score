@@ -12,7 +12,7 @@
 .brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.13em;font-weight:700;margin-top:1px}
 .navGroupTitle{padding:0 11px;color:#6e8073;font-size:9px;letter-spacing:.15em;font-weight:900;text-transform:uppercase;margin-bottom:7px}
 .nav{display:grid;gap:4px}.nav button{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:1px solid transparent;border-radius:9px;background:transparent;color:#b8c5ba;text-align:left;font-size:12px;font-weight:700;transition:.15s}.nav button .ico{width:20px;text-align:center;font-size:15px}.nav button:hover{background:#ffffff07;color:white}.nav button.active{background:#9cf36b17;color:var(--green);border-color:#9cf36b25}
-.sideBottom{margin-top:auto}.sideStatus{padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.online{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800}.dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 0 4px #9cf36b16}.sideStatus p{font-size:10px;color:var(--muted);margin:8px 0 0}
+.adminPanel{border:1px solid var(--line);background:#101b14;border-radius:12px;padding:10px;display:grid;gap:5px;max-height:44vh;overflow:auto}.adminPanel[hidden]{display:none!important}.adminPanelHead{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:11px}.adminPanelHead span{font-weight:500;color:var(--muted);text-align:right}.adminNote{border-left:3px solid var(--green);background:#9cf36b0d;border-radius:7px;padding:9px;font-size:10px;color:#b6c4b8;margin:2px 0}.adminAction{width:100%;padding:9px 7px;border:1px solid var(--line);border-radius:8px;background:#19251d;color:#e7eee8;font-size:10px;font-weight:800;line-height:1.35}.adminAction:hover{border-color:#9cf36b70;background:#1e3023}.adminAction.danger{color:#ffb2a8}.adminStatus{font-size:10px;line-height:1.5;color:var(--muted);overflow-wrap:anywhere;padding:3px 1px}.sideBottom{margin-top:auto}.sideStatus{padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}.online{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800}.dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 0 4px #9cf36b16}.sideStatus p{font-size:10px;color:var(--muted);margin:8px 0 0}
 .main{min-width:0;padding:0 clamp(18px,3vw,42px) 30px}.topbar{height:78px;display:flex;align-items:center;justify-content:space-between;gap:15px;border-bottom:1px solid #ffffff12;margin-bottom:26px}.crumb{font-size:12px;color:var(--muted)}.crumb b{color:var(--text)}.topActions{display:flex;gap:9px;align-items:center}.weatherBadge{border:1px solid var(--line);border-radius:8px;padding:8px 11px;color:#c6d2c8;font-size:11px}.avatar{width:34px;height:34px;border-radius:10px;background:#203426;display:grid;place-items:center;color:var(--green);font-weight:900}
 .page{display:none;animation:appear .18s ease}.page.active{display:block}@keyframes appear{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 .pageTitle{display:flex;align-items:flex-end;justify-content:space-between;gap:15px;margin-bottom:21px}.eyebrow{font-size:10px;color:var(--green);font-weight:900;text-transform:uppercase;letter-spacing:.16em;margin-bottom:6px}.pageTitle h1{font-size:clamp(25px,3vw,34px);line-height:1.12;letter-spacing:-.045em;margin:0;font-weight:900}.pageTitle p{margin:8px 0 0;color:var(--muted);font-size:12px;max-width:650px}.btn{display:inline-flex;justify-content:center;align-items:center;gap:7px;padding:10px 14px;border-radius:8px;border:1px solid transparent;background:var(--green);color:#081109;font-size:11px;font-weight:900}.btn.secondary{background:var(--surface2);border-color:var(--line);color:var(--text)}.btn:disabled{opacity:.5;cursor:not-allowed}
@@ -44,6 +44,16 @@
       <button data-tab="tips"><span class="ico">🧭</span> Poradniki</button>
     </nav>
   </div>
+  <section id="adminPanel" class="adminPanel" hidden>
+  <div class="adminPanelHead"><b>🔐 Panel administratora</b><span id="adminState">Wylogowany</span></div>
+  <div class="adminNote">Zarządzanie łowiskami i wpisami.</div>
+  <button class="adminAction" id="migrateSpotsBtn" type="button">☁️ Przenieś moje łowiska do bazy</button>
+  <button class="adminAction" id="syncSpotsBtn" type="button">🔄 Synchronizuj łowiska</button>
+  <button class="adminAction" id="migrateLogsBtn" type="button">🎣 Przenieś dziennik do bazy</button>
+  <button class="adminAction" id="syncLogsBtn" type="button">🔄 Synchronizuj dziennik</button>
+  <button class="adminAction danger" id="adminLogoutBtn" type="button">Wyloguj</button>
+  <div id="cloudStatus" class="adminStatus" role="status">☁️ Baza wspólna: gotowa do sprawdzenia.</div>
+</section>
   <div class="sideBottom"><div class="sideStatus"><div class="online"><i class="dot"></i> System gotowy</div><p>Wersja testowa · zmiany nie wpływają na stronę główną.</p></div></div>
 </aside>
 <main class="main">
@@ -161,6 +171,65 @@ function setAuthMode(mode){
  $('authSubmit').textContent=mode==='login'?'Zaloguj się':mode==='register'?'Załóż konto':'Wyślij link resetujący';
  $('authStatus').textContent='';
 }
+
+let currentAdminUser=null;
+function updateAdminPanel(session){
+ currentAdminUser=session?.user||null;
+ const isAdmin=currentAdminUser?.app_metadata?.role==='admin';
+ $('adminPanel').hidden=!isAdmin;
+ if(isAdmin){
+  $('adminState').textContent='Zalogowany: '+(currentAdminUser.user_metadata?.username||currentAdminUser.email||'administrator');
+  $('adminOpenStatus').textContent='Konto administratora';
+  $('cloudStatus').textContent='☁️ Zalogowano. Sprawdzam wspólną bazę…';
+  syncCloudSpots();syncCloudCatches();
+ }else{
+  $('adminState').textContent='Brak uprawnień';
+  if($('adminOpenStatus'))$('adminOpenStatus').textContent='Wersja testowa';
+ }
+}
+function adminRequire(){if(currentAdminUser?.app_metadata?.role!=='admin'){$('cloudStatus').textContent='⛔ Ta operacja wymaga uprawnień administratora.';return false}if(!db){$('cloudStatus').textContent='⛔ Brak połączenia z Supabase.';return false}return true}
+function previewLocalSpots(){try{return JSON.parse(localStorage.getItem('fs_preview_spots_v1')||'[]')}catch(_){return[]}}
+function previewSaveSpots(rows){localStorage.setItem('fs_preview_spots_v1',JSON.stringify(rows))}
+function previewSaveLogs(rows){localStorage.setItem('fs_preview_logs_v2',JSON.stringify(rows));renderLogs()}
+async function cloudReadSpots(){const {data,error}=await db.from('fishing_spots').select('id,name,latitude,longitude,label,description').order('name');if(error)throw error;return data||[]}
+async function cloudReadCatches(){const {data,error}=await db.from('fishing_catches').select('*').order('date',{ascending:false});if(error)throw error;return data||[]}
+async function syncCloudSpots(){
+ if(!adminRequire())return;
+ try{const cloud=await cloudReadSpots();previewSaveSpots(cloud);$('statSpots').textContent=cloud.length;$('spotsStatus').textContent='Zsynchronizowano '+cloud.length+' łowisk ze wspólnej bazy.';$('spotsList').innerHTML=cloud.length?cloud.map(s=>'<article class="listItem"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><b>📍 '+esc(s.name)+'</b><small>'+esc(s.label||s.description||'Zapisane łowisko')+' · '+Number(s.latitude).toFixed(4)+', '+Number(s.longitude).toFixed(4)+'</small></div><button class="btn secondary" data-map="'+s.latitude+','+s.longitude+'" data-mapname="'+esc(s.name)+'">Pokaż mapę</button></div></article>').join(''):'<div class="empty">Baza łowisk jest pusta.</div>';$('cloudStatus').textContent='☁️ Zsynchronizowano '+cloud.length+' łowisk.'}catch(e){$('cloudStatus').textContent='❌ Synchronizacja łowisk nie powiodła się: '+(e.message||e)}
+}
+async function migrateSpotsToCloud(){
+ if(!adminRequire())return;
+ const local=previewLocalSpots();
+ if(!local.length){$('cloudStatus').textContent='☁️ Brak lokalnych łowisk do przeniesienia. Aktualne łowiska są już pobierane ze wspólnej bazy.';return}
+ if(!confirm('Przenieść '+local.length+' lokalnych łowisk do wspólnej bazy?'))return;
+ try{for(const s of local){const row={name:s.name,latitude:Number(s.latitude),longitude:Number(s.longitude),label:s.label||s.name,description:s.description||''};const {error}=await db.from('fishing_spots').insert(row);if(error)throw error}await syncCloudSpots();$('cloudStatus').textContent='☁️ Przeniesiono '+local.length+' łowisk do wspólnej bazy.'}catch(e){$('cloudStatus').textContent='❌ Migracja łowisk nie powiodła się: '+(e.message||e)}
+}
+function normalizePreviewCatch(c){return {id:c.id??null,spot_id:c.spot_id??c.spotId??null,spot:c.spot||'',date:c.date||new Date().toISOString(),author:c.author||'',species:c.species||'',result:c.result||'TAK',weight:c.weight===''||c.weight==null?null:Number(c.weight),length:c.length===''||c.length==null?null:Number(c.length),bait:c.bait||'',groundbait:c.groundbait||'',note:c.note||'',conditions:c.conditions||null}}
+async function syncCloudCatches(){
+ if(!adminRequire())return;
+ try{
+  const cloud=await cloudReadCatches(),local=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]'),byId=new Map(cloud.map(x=>[Number(x.id),x]));
+  let merged=[...cloud];
+  for(const l of local){if(l.id&&byId.has(Number(l.id)))continue;if(l.id)continue;const row=normalizePreviewCatch(l);delete row.id;const {data,error}=await db.from('fishing_catches').insert(row).select('*').single();if(error)throw error;merged.push(data)}
+  merged.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  previewSaveLogs(merged.map(normalizePreviewCatch).map(x=>({...x,id:x.id})));
+  $('reportsStatus').textContent='Dziennik zsynchronizowany: '+merged.length+' wpisów we wspólnej bazie.';
+  $('cloudStatus').textContent='☁️ Zsynchronizowano dziennik: '+merged.length+' wpisów.';
+ }catch(e){$('cloudStatus').textContent='❌ Synchronizacja dziennika nie powiodła się: '+(e.message||e)}
+}
+async function migrateCatchesToCloud(){
+ if(!adminRequire())return;
+ const local=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]'),pending=local.filter(x=>!x.id);
+ if(!pending.length){$('cloudStatus').textContent='☁️ Brak lokalnych wpisów do przeniesienia.';return}
+ if(!confirm('Przenieść '+pending.length+' lokalnych wpisów do wspólnego dziennika Supabase?'))return;
+ try{for(const l of pending){const row=normalizePreviewCatch(l);delete row.id;const {data,error}=await db.from('fishing_catches').insert(row).select('*').single();if(error)throw error;l.id=data.id}previewSaveLogs(local);await syncCloudCatches();$('cloudStatus').textContent='☁️ Przeniesiono '+pending.length+' wpisów dziennika do bazy.'}catch(e){$('cloudStatus').textContent='❌ Migracja dziennika nie powiodła się: '+(e.message||e)}
+}
+$('migrateSpotsBtn').addEventListener('click',migrateSpotsToCloud);
+$('syncSpotsBtn').addEventListener('click',syncCloudSpots);
+$('migrateLogsBtn').addEventListener('click',migrateCatchesToCloud);
+$('syncLogsBtn').addEventListener('click',syncCloudCatches);
+$('adminLogoutBtn').addEventListener('click',async()=>{if(db?.auth)await db.auth.signOut();updateAdminPanel(null);$('authOpen').textContent='Zaloguj się / Załóż konto';$('userAvatar').textContent='FS';$('cloudStatus').textContent='Wylogowano.'});
+
 function openAuth(mode='login'){$('authModal').classList.add('open');$('authModal').setAttribute('aria-hidden','false');setAuthMode(mode)}
 function closeAuth(){$('authModal').classList.remove('open');$('authModal').setAttribute('aria-hidden','true')}
 $('authOpen').addEventListener('click',()=>openAuth());
@@ -188,7 +257,7 @@ $('authForm').addEventListener('submit',async e=>{
    if(!session?.access_token||!session?.refresh_token)throw Error('Serwer nie zwrócił sesji logowania.');
    result=await db.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
    if(result.error)throw result.error;
-   status.textContent='Zalogowano pomyślnie.';$('userAvatar').textContent=(login[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto';setTimeout(closeAuth,800);
+   status.textContent='Zalogowano pomyślnie.';$('userAvatar').textContent=(login[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto';updateAdminPanel(result.data?.session||null);setTimeout(closeAuth,800);
   }else{
    const resetResult=await db.functions.invoke('username-auth',{body:{mode:'reset',username:login,email,redirectTo:location.origin+location.pathname}});
    if(resetResult.error)throw Error(resetResult.data?.error||resetResult.error.message||'Nie udało się wysłać linku resetującego.');
@@ -199,8 +268,8 @@ $('authForm').addEventListener('submit',async e=>{
  finally{$('authSubmit').disabled=false}
 });
 if(db?.auth){
- db.auth.getSession().then(({data})=>{if(data.session?.user){$('userAvatar').textContent=(data.session.user.user_metadata?.username?.[0]||data.session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}});
- db.auth.onAuthStateChange((event,session)=>{if(session?.user){$('userAvatar').textContent=(session.user.user_metadata?.username?.[0]||session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}else{$('userAvatar').textContent='FS';$('authOpen').textContent='Zaloguj się / Załóż konto'}});
+ db.auth.getSession().then(({data})=>{const session=data.session;if(session?.user){$('userAvatar').textContent=(session.user.user_metadata?.username?.[0]||session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}updateAdminPanel(session)});
+ db.auth.onAuthStateChange((event,session)=>{if(session?.user){$('userAvatar').textContent=(session.user.user_metadata?.username?.[0]||session.user.email?.[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto'}else{$('userAvatar').textContent='FS';$('authOpen').textContent='Zaloguj się / Załóż konto'}updateAdminPanel(session)});
 }
 
 loadWeather('Rudna Mała');loadReports();loadSpots();renderLogs();
