@@ -196,7 +196,8 @@ function updateAdminPanel(session){
 function adminRequire(){if(!isPreviewAdmin(currentAdminUser)){$('cloudStatus').textContent='⛔ Ta operacja wymaga uprawnień administratora.';return false}if(!db){$('cloudStatus').textContent='⛔ Brak połączenia z Supabase.';return false}return true}
 function previewLocalSpots(){try{const test=JSON.parse(localStorage.getItem('fs_preview_spots_v1')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_spots')||'[]')}catch(_){return[]}}
 function previewSaveSpots(rows){localStorage.setItem('fs_preview_spots_v1',JSON.stringify(rows))}
-function previewLocalLogs(){try{const test=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_logs')||'[]')}catch(_){return[]}}\nfunction previewSaveLogs(rows){localStorage.setItem('fs_preview_logs_v2',JSON.stringify(rows));renderLogs()}
+function previewLocalLogs(){try{const test=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_logs')||'[]')}catch(_){return[]}}
+function previewSaveLogs(rows){localStorage.setItem('fs_preview_logs_v2',JSON.stringify(rows));renderLogs()}
 async function cloudReadSpots(){const {data,error}=await db.from('fishing_spots').select('id,name,latitude,longitude,label,description').order('name');if(error)throw error;return data||[]}
 async function cloudReadCatches(){const {data,error}=await db.from('fishing_catches').select('*').order('date',{ascending:false});if(error)throw error;return data||[]}
 async function syncCloudSpots(){
