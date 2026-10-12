@@ -180,10 +180,9 @@ function updateAdminPanel(session){
  if(isAdmin){
   $('adminState').textContent='Zalogowany: '+(currentAdminUser.user_metadata?.username||currentAdminUser.email||'administrator');
     $('cloudStatus').textContent='☁️ Zalogowano. Sprawdzam wspólną bazę…';
-  syncCloudSpots();syncCloudCatches();
+  $('cloudStatus').textContent='☁️ Zalogowano jako administrator. Użyj przycisków, aby synchronizować lub przenieść dane.';
  }else{
   $('adminState').textContent='Brak uprawnień';
-  if($('adminOpenStatus'))$('adminOpenStatus').textContent='Wersja testowa';
  }
 }
 function adminRequire(){if(currentAdminUser?.app_metadata?.role!=='admin'){$('cloudStatus').textContent='⛔ Ta operacja wymaga uprawnień administratora.';return false}if(!db){$('cloudStatus').textContent='⛔ Brak połączenia z Supabase.';return false}return true}
