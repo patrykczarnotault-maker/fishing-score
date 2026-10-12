@@ -182,20 +182,17 @@ $('authForm').addEventListener('submit',async e=>{
    result=await db.auth.signUp({email,password,options:{data:{username:login,display_name:login}}});
    if(!result.error)status.textContent='Konto utworzone. Jeśli włączono weryfikację, sprawdź e-mail. Uwaga: unikalność loginu wymaga wymuszenia jej po stronie bazy.';
   }else if(authMode==='login'){
-   // Supabase password auth accepts email, not username. Resolve username through a secure server-side RPC.
-   const mapped=await db.rpc('get_email_for_username',{username_input:login.toLowerCase()});
-   if(mapped.error)throw Error('Logowanie po loginie wymaga skonfigurowania funkcji get_email_for_username w Supabase.');
-   const resolvedEmail=typeof mapped.data==='string'?mapped.data:mapped.data?.email;
-   if(!resolvedEmail)throw Error('Nie znaleziono konta dla podanego loginu.');
-   result=await db.auth.signInWithPassword({email:resolvedEmail,password});
-   if(!result.error){status.textContent='Zalogowano pomyślnie.';$('userAvatar').textContent=(login[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto';setTimeout(closeAuth,800)}
+   const authResult=await db.functions.invoke('username-auth',{body:{mode:'login',username:login,password}});
+   if(authResult.error)throw Error(authResult.data?.error||authResult.error.message||'Nie udało się zalogować.');
+   const session=authResult.data?.session;
+   if(!session?.access_token||!session?.refresh_token)throw Error('Serwer nie zwrócił sesji logowania.');
+   result=await db.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
+   if(result.error)throw result.error;
+   status.textContent='Zalogowano pomyślnie.';$('userAvatar').textContent=(login[0]||'U').toUpperCase();$('authOpen').textContent='Moje konto';setTimeout(closeAuth,800);
   }else{
-   // Check username + email together on the server, without exposing the account email lookup.
-   const verified=await db.rpc('verify_username_email',{username_input:login.toLowerCase(),email_input:email.toLowerCase()});
-   if(verified.error)throw Error('Reset hasła wymaga skonfigurowania funkcji verify_username_email w Supabase.');
-   if(verified.data!==true)throw Error('Login i adres e-mail nie pasują do tego samego konta.');
-   result=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
-   if(!result.error)status.textContent='Jeśli dane są poprawne, wysłaliśmy link do resetu hasła na podany adres e-mail.';
+   const resetResult=await db.functions.invoke('username-auth',{body:{mode:'reset',username:login,email,redirectTo:location.origin+location.pathname}});
+   if(resetResult.error)throw Error(resetResult.data?.error||resetResult.error.message||'Nie udało się wysłać linku resetującego.');
+   status.textContent=resetResult.data?.message||'Link do resetu hasła został wysłany na podany adres e-mail.';
   }
   if(result?.error)throw result.error;
  }catch(err){status.textContent='Nie udało się wykonać operacji: '+(err.message||'błąd usługi')}
