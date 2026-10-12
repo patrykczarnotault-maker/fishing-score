@@ -151,7 +151,7 @@ function setAuthMode(mode){
  $('authNameWrap').hidden=false;
  $('authEmailWrap').hidden=mode!=='register'&&mode!=='forgot';
  $('authPasswordWrap').hidden=mode==='forgot';
- $('authPasswordHint').hidden=mode!=='register';
+ $('authPasswordHint').hidden=mode!=='register';$('authPasswordHint').style.display=mode==='register'?'block':'none';
  $('authName').required=true;
  $('authEmail').required=mode==='register'||mode==='forgot';
  $('authPassword').required=mode!=='forgot';
