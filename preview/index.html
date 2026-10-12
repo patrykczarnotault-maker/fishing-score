@@ -179,7 +179,7 @@ $('authForm').addEventListener('submit',async e=>{
   if(authMode==='register'){
    if(!strongPassword(password))throw Error('Hasło musi mieć minimum 8 znaków, jedną wielką literę i jeden znak specjalny.');
    if(!/^[a-zA-Z0-9_.-]{3,32}$/.test(login))throw Error('Login musi mieć 3–32 znaki: litery, cyfry, kropkę, myślnik lub podkreślenie.');
-   result=await db.auth.signUp({email,password,options:{data:{username:login,display_name:login}}});
+   result=await db.auth.signUp({email,password,options:{emailRedirectTo:'https://fishscore.pl/preview/',data:{username:login,display_name:login}}});
    if(!result.error)status.textContent='Konto utworzone. Jeśli włączono weryfikację, sprawdź e-mail. Uwaga: unikalność loginu wymaga wymuszenia jej po stronie bazy.';
   }else if(authMode==='login'){
    const authResult=await db.functions.invoke('username-auth',{body:{mode:'login',username:login,password}});
