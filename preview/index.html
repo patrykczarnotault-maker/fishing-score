@@ -179,8 +179,7 @@ function updateAdminPanel(session){
  $('adminPanel').hidden=!isAdmin;
  if(isAdmin){
   $('adminState').textContent='Zalogowany: '+(currentAdminUser.user_metadata?.username||currentAdminUser.email||'administrator');
-  $('adminOpenStatus').textContent='Konto administratora';
-  $('cloudStatus').textContent='☁️ Zalogowano. Sprawdzam wspólną bazę…';
+    $('cloudStatus').textContent='☁️ Zalogowano. Sprawdzam wspólną bazę…';
   syncCloudSpots();syncCloudCatches();
  }else{
   $('adminState').textContent='Brak uprawnień';
@@ -188,9 +187,9 @@ function updateAdminPanel(session){
  }
 }
 function adminRequire(){if(currentAdminUser?.app_metadata?.role!=='admin'){$('cloudStatus').textContent='⛔ Ta operacja wymaga uprawnień administratora.';return false}if(!db){$('cloudStatus').textContent='⛔ Brak połączenia z Supabase.';return false}return true}
-function previewLocalSpots(){try{return JSON.parse(localStorage.getItem('fs_preview_spots_v1')||'[]')}catch(_){return[]}}
+function previewLocalSpots(){try{const test=JSON.parse(localStorage.getItem('fs_preview_spots_v1')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_spots')||'[]')}catch(_){return[]}}
 function previewSaveSpots(rows){localStorage.setItem('fs_preview_spots_v1',JSON.stringify(rows))}
-function previewSaveLogs(rows){localStorage.setItem('fs_preview_logs_v2',JSON.stringify(rows));renderLogs()}
+function previewLocalLogs(){try{const test=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]');if(test.length)return test;return JSON.parse(localStorage.getItem('fs_logs')||'[]')}catch(_){return[]}}\nfunction previewSaveLogs(rows){localStorage.setItem('fs_preview_logs_v2',JSON.stringify(rows));renderLogs()}
 async function cloudReadSpots(){const {data,error}=await db.from('fishing_spots').select('id,name,latitude,longitude,label,description').order('name');if(error)throw error;return data||[]}
 async function cloudReadCatches(){const {data,error}=await db.from('fishing_catches').select('*').order('date',{ascending:false});if(error)throw error;return data||[]}
 async function syncCloudSpots(){
@@ -208,7 +207,7 @@ function normalizePreviewCatch(c){return {id:c.id??null,spot_id:c.spot_id??c.spo
 async function syncCloudCatches(){
  if(!adminRequire())return;
  try{
-  const cloud=await cloudReadCatches(),local=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]'),byId=new Map(cloud.map(x=>[Number(x.id),x]));
+  const cloud=await cloudReadCatches(),local=previewLocalLogs(),byId=new Map(cloud.map(x=>[Number(x.id),x]));
   let merged=[...cloud];
   for(const l of local){if(l.id&&byId.has(Number(l.id)))continue;if(l.id)continue;const row=normalizePreviewCatch(l);delete row.id;const {data,error}=await db.from('fishing_catches').insert(row).select('*').single();if(error)throw error;merged.push(data)}
   merged.sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -219,7 +218,7 @@ async function syncCloudCatches(){
 }
 async function migrateCatchesToCloud(){
  if(!adminRequire())return;
- const local=JSON.parse(localStorage.getItem('fs_preview_logs_v2')||'[]'),pending=local.filter(x=>!x.id);
+ const local=previewLocalLogs(),pending=local.filter(x=>!x.id);
  if(!pending.length){$('cloudStatus').textContent='☁️ Brak lokalnych wpisów do przeniesienia.';return}
  if(!confirm('Przenieść '+pending.length+' lokalnych wpisów do wspólnego dziennika Supabase?'))return;
  try{for(const l of pending){const row=normalizePreviewCatch(l);delete row.id;const {data,error}=await db.from('fishing_catches').insert(row).select('*').single();if(error)throw error;l.id=data.id}previewSaveLogs(local);await syncCloudCatches();$('cloudStatus').textContent='☁️ Przeniesiono '+pending.length+' wpisów dziennika do bazy.'}catch(e){$('cloudStatus').textContent='❌ Migracja dziennika nie powiodła się: '+(e.message||e)}
