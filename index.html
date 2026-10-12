@@ -245,9 +245,9 @@ function renderCalendar(){
  let today=new Date();
  for(let d=1;d<=days;d++){
   let key=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),has=counts[key]||0,isToday=today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d;
-  out+='<button type="button" class="calday '+(has?'has ':'')+(isToday?'today ':'')+(selectedCalDay===key?'selected':'')+'" onclick="pickDate(\\''+key+'\\')"><b>'+d+'</b>'+(has?'<span class="badge">'+has+' '+(has===1?'wpis':'wpisy')+'</span>':'')+'</button>';
+  out+='<button type="button" data-date="'+key+'" class="calday '+(has?'has ':'')+(isToday?'today ':'')+(selectedCalDay===key?'selected':'')+'"><b>'+d+'</b>'+(has?'<span class="badge">'+has+' '+(has===1?'wpis':'wpisy')+'</span>':'')+'</button>';
  }
- $('calendar').innerHTML=out;
+ $('calendar').innerHTML=out;$('calendar').querySelectorAll('[data-date]').forEach(b=>b.addEventListener('click',()=>pickDate(b.dataset.date)));
 }
 function renderDayDetails(k){
  let items=getLogs().filter(l=>String(l.date||'').slice(0,10)===k).sort((a,b)=>new Date(a.date)-new Date(b.date)),box=$('dayDetails');
