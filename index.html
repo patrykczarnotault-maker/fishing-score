@@ -166,6 +166,126 @@ body{background-color:#050c08}
 @media(max-width:760px){
   #fsCarpEasterEgg{left:6px;width:clamp(165px,48vw,210px);bottom:15vh}
 }
+
+/* ===== RESPONSIVE LAYOUT • 100% BROWSER ZOOM ===== */
+/* Layout adapts to the available viewport; never scale the whole page with zoom. */
+html{width:100%;min-width:320px}
+body{width:100%;min-width:320px}
+.wrap{
+  width:100%;
+  max-width:2200px;
+  margin-inline:auto;
+  padding:clamp(16px,1.8vw,36px) clamp(14px,2.2vw,44px) clamp(32px,3vw,58px);
+}
+.hero{gap:clamp(14px,1.8vw,30px)}
+.heroLeft{min-width:0}
+.heroRight{flex:0 0 clamp(260px,22vw,380px);width:auto;min-width:0}
+.search{min-width:0}
+.mainTabs{width:100%;gap:clamp(4px,.6vw,10px)}
+.mainTab{min-width:0;overflow-wrap:anywhere}
+.mainPane{min-width:0}
+.card{min-width:0;padding:clamp(14px,1.15vw,24px);border-radius:clamp(14px,1vw,20px)}
+.grid,.dashboardPair{min-width:0}
+.metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(7px,.7vw,12px)}
+.species{grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(7px,.7vw,12px)}
+.feeding{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,.8vw,14px)}
+.seasonSummary{grid-template-columns:repeat(5,minmax(0,1fr))}
+.seasonMonths{grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(3px,.4vw,8px)}
+.metric,.spec,.feed,.seasonMetric,.seasonMonth,.spot,.log,.spotRank{min-width:0}
+.metric small,.spec small,.feed .meta,.spotRankMeta,.sub{overflow-wrap:anywhere}
+input,select,textarea,button{max-width:100%}
+.map{max-width:100%}
+img,svg,canvas,iframe{max-width:100%}
+.top8Row{grid-template-columns:34px 60px minmax(70px,1fr) 64px 72px;gap:clamp(5px,.6vw,12px)}
+/* Large desktop / ultrawide: use available width while keeping text comfortable. */
+@media(min-width:1600px){
+  .wrap{max-width:2400px;padding-inline:clamp(36px,2.4vw,64px)}
+  h1{font-size:clamp(38px,2.8vw,60px)}
+  .sub{font-size:clamp(12px,.78vw,16px)}
+  .card h2{font-size:clamp(18px,1.05vw,24px)}
+  .metric{padding:clamp(12px,.85vw,18px)}
+  .metric strong{font-size:clamp(15px,.9vw,19px)}
+  .metric small{font-size:clamp(11px,.68vw,14px)}
+  .spec{padding:clamp(12px,.9vw,19px)}
+  .spec b{font-size:clamp(17px,1vw,22px)}
+  .spec small{font-size:clamp(11px,.68vw,14px)}
+  .mainTab{padding:clamp(10px,.7vw,15px)}
+  .score{font-size:clamp(82px,5.5vw,124px)}
+}
+/* Standard desktop and laptop. */
+@media(max-width:1250px){
+  .wrap{padding-inline:clamp(14px,2vw,26px)}
+  .heroRight{flex-basis:300px}
+  .grid{gap:12px}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .species{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .seasonSummary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .seasonMonths{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .mainTab{padding:10px 8px;font-size:13px}
+}
+/* Tablet / narrow windows: stack header and collapse dashboard columns. */
+@media(max-width:900px){
+  .hero{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+  .heroRight{width:100%;flex:1 1 auto;min-width:0}
+  .heroLeft{min-height:120px}
+  .grid,.dashboardPair,.dashboardPair:first-of-type,.dashboardPair:has(#spotRanking){grid-template-columns:minmax(0,1fr)!important}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .species{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feeding{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seasonSummary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .seasonMonths{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .mainTabs{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mainTab{width:100%;min-width:0}
+  .map{height:clamp(260px,45vw,380px)}
+  .dashboardPair:has(#spotRanking)>.card:last-child .formgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* Phone: readable single-column controls, with compact but tappable navigation. */
+@media(max-width:600px){
+  .wrap{padding:12px 10px 30px}
+  .heroLeft{min-height:0;padding:10px 0}
+  .heroLeft h1{font-size:clamp(29px,8vw,42px);letter-spacing:-1px}
+  .sub{font-size:12px}
+  .search{padding:8px;gap:7px}
+  .search input{flex-basis:100%;width:100%}
+  .search button{flex:1 1 auto;padding:11px 10px}
+  .mainTabs{gap:5px;padding:5px;margin-top:12px}
+  .mainTab{font-size:12px;line-height:1.25;padding:11px 6px}
+  .card{padding:14px;border-radius:15px}
+  .card h2{font-size:18px}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .metric{padding:10px}
+  .metric strong{font-size:14px}
+  .metric small{font-size:11px}
+  .species{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .spec{padding:11px}
+  .feeding{grid-template-columns:minmax(0,1fr);gap:8px}
+  .feed{padding:14px}
+  .feed strong{font-size:24px}
+  .daygrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seasonSummary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seasonMonths{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .seasonMonth{height:130px;padding:8px 4px}
+  .seasonMonthBar{height:65px}
+  .top8Row{grid-template-columns:25px 48px minmax(45px,1fr) 52px;gap:6px;padding:8px}
+  .top8Meta{display:none}
+  .top8Time,.top8Score{font-size:13px}
+  .spot{align-items:flex-start;flex-wrap:wrap}
+  .spot button{flex-shrink:0}
+  .formgrid,.strategyGrid{grid-template-columns:minmax(0,1fr)}
+  .dashboardPair:has(#spotRanking)>.card:last-child .formgrid{grid-template-columns:minmax(0,1fr)}
+  .calendar{gap:2px}
+  .calday,.calname{padding:5px 2px;font-size:11px}
+  .calday{min-height:42px}
+  .map{height:260px}
+  .score{font-size:clamp(68px,18vw,92px)}
+}
+/* Very narrow phones */
+@media(max-width:370px){
+  .metrics,.species,.seasonSummary{grid-template-columns:minmax(0,1fr)}
+  .mainTabs{grid-template-columns:minmax(0,1fr)}
+  .seasonMonths{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
 </style><link rel="manifest" href="/manifest.json"><link rel="icon" href="/icon.svg" type="image/svg+xml"><meta name="theme-color" content="#0b2117"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Fishing Score"></head><body>
 <div id="fsCarpEasterEgg" aria-hidden="true">
   <svg viewBox="0 0 360 330" xmlns="http://www.w3.org/2000/svg" role="presentation">
