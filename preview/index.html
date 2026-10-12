@@ -200,7 +200,7 @@ async function migrateSpotsToCloud(){
  const local=previewLocalSpots();
  if(!local.length){$('cloudStatus').textContent='☁️ Brak lokalnych łowisk do przeniesienia. Aktualne łowiska są już pobierane ze wspólnej bazy.';return}
  if(!confirm('Przenieść '+local.length+' lokalnych łowisk do wspólnej bazy?'))return;
- try{for(const s of local){const row={name:s.name,latitude:Number(s.latitude),longitude:Number(s.longitude),label:s.label||s.name,description:s.description||''};const {error}=await db.from('fishing_spots').insert(row);if(error)throw error}await syncCloudSpots();$('cloudStatus').textContent='☁️ Przeniesiono '+local.length+' łowisk do wspólnej bazy.'}catch(e){$('cloudStatus').textContent='❌ Migracja łowisk nie powiodła się: '+(e.message||e)}
+ try{for(const s of local){const row={...(s.id!=null?{id:Number(s.id)}:{}),name:s.name,latitude:Number(s.latitude),longitude:Number(s.longitude),label:s.label||s.name,description:s.description||'',updated_at:new Date().toISOString()};const {error}=await db.from('fishing_spots').upsert(row);if(error)throw error}await syncCloudSpots();$('cloudStatus').textContent='☁️ Przeniesiono '+local.length+' łowisk do wspólnej bazy.'}catch(e){$('cloudStatus').textContent='❌ Migracja łowisk nie powiodła się: '+(e.message||e)}
 }
 function normalizePreviewCatch(c){return {id:c.id??null,spot_id:c.spot_id??c.spotId??null,spot:c.spot||'',date:c.date||new Date().toISOString(),author:c.author||'',species:c.species||'',result:c.result||'TAK',weight:c.weight===''||c.weight==null?null:Number(c.weight),length:c.length===''||c.length==null?null:Number(c.length),bait:c.bait||'',groundbait:c.groundbait||'',note:c.note||'',conditions:c.conditions||null}}
 async function syncCloudCatches(){
