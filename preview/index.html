@@ -44,7 +44,7 @@
       <button class="active" data-tab="home"><span class="ico">⌂</span> Pulpit</button>
       <button data-tab="weather"><span class="ico">☀</span> Pogoda i analiza</button>
       <button data-tab="spots"><span class="ico">📍</span> Łowiska</button>
-      <button data-tab="bathymetry"><span class="ico">🌊</span> Wirtualny staw</button>
+      <button data-tab="bathymetry"><span class="ico">🌊</span> Mapa głębokości stawów</button>
       <button data-tab="reports"><span class="ico">🎣</span> Raporty połowów</button>
       <button data-tab="journal"><span class="ico">📒</span> Dziennik połowów</button>
       <button data-tab="tips"><span class="ico">🧭</span> Poradniki</button>
@@ -105,7 +105,7 @@
     <section class="panel"><div class="panelHead"><h2>Ostatnie wpisy</h2><span class="muted small">Zapis lokalny</span></div><div class="list" id="localLogs"><div class="empty">Nie dodano jeszcze wpisów.</div></div></section></div>
   </section>
   <section class="page" id="page-bathymetry">
- <div class="pageTitle bathyPageTitle"><div><div class="eyebrow">Mapa głębokości</div><h1>Wirtualny staw — Lipie 2</h1><p>Interaktywny schemat odtworzony z Twojej mapy batymetrycznej.</p></div><div class="bathyControls"><button class="btn secondary" type="button" onclick="toggleBathyLayer('bathyContours',this)">〰️ Izobaty: włączone</button><button class="btn secondary" type="button" onclick="toggleBathyLayer('bathyLabels',this)">🔢 Głębokości: włączone</button></div></div>
+ <div class="pageTitle bathyPageTitle"><div><div class="eyebrow">Mapa głębokości</div><h1>Mapa głębokości stawów — Lipie 2</h1><p>Interaktywny schemat odtworzony z Twojej mapy batymetrycznej.</p></div><div class="bathyControls"><button class="btn secondary" type="button" onclick="toggleBathyLayer('bathyContours',this)">〰️ Izobaty: włączone</button><button class="btn secondary" type="button" onclick="toggleBathyLayer('bathyLabels',this)">🔢 Głębokości: włączone</button></div></div>
  <section class="panel"><div class="satMapWrap">
  <div class="satMapHead"><div><h3>🛰️ Lipie 2 — widok satelitarny</h3><p class="satMapNote">Przybliżony widok zbiornika i najbliższych obrzeży. Możesz przesuwać mapę i przybliżać ją.</p></div><button class="satMapBtn" type="button" id="satResetBtn">↺ Przywróć widok</button></div>
  <div id="lipieSatelliteMap" role="application" aria-label="Mapa satelitarna Lipia 2"></div>
@@ -182,7 +182,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const $=id=>document.getElementById(id);
-const names={home:'Pulpit',weather:'Pogoda i analiza',spots:'Łowiska',bathymetry:'Wirtualny staw',reports:'Raporty połowów',journal:'Dziennik połowów',tips:'Poradniki'};
+const names={home:'Pulpit',weather:'Pogoda i analiza',spots:'Łowiska',bathymetry:'Mapa głębokości stawów',reports:'Raporty połowów',journal:'Dziennik połowów',tips:'Poradniki'};
 function showTab(tab){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+tab));if(tab==='bathymetry'){setTimeout(initLipieSatelliteMap,80);}document.querySelectorAll('[data-tab]').forEach(b=>{if(b.matches('button'))b.classList.toggle('active',b.dataset.tab===tab)});$('crumbName').textContent=names[tab]||'Pulpit';if(tab==='spots')loadSpots();if(tab==='reports')loadReports();window.scrollTo({top:0,behavior:'smooth'})}
 
 
